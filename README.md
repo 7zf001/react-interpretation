@@ -10,17 +10,28 @@ PS：不会对任何 DEV 环境下的代码做解读，类似以下代码：
 
 ```js
 if (__DEV__) {
-  // ...
+	// ...
 }
 ```
 
-## 文章列表
+## 文章链接
 
-- [热身篇](https://github.com/KieSun/Dream/issues/18)
-- [render 流程（一）](https://github.com/KieSun/Dream/issues/19)
+需要注意一点：文章的风格分为了两部分。 从调度原理开始，笔者抛弃了单纯讲源码的方式。而是将重点放在了原理上，尽可能地脱离源码讲原理，这种方式能更快更好地让读者学习到知识。
 
-## 我的公众号
+- [热身篇](https://github.com/KieSun/learn-react-essence/blob/master/%E7%83%AD%E8%BA%AB%E7%AF%87.md)
+- [render 流程（一）](https://github.com/KieSun/learn-react-essence/blob/master/render%20%E6%B5%81%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89)
+- [render 流程（二）](https://github.com/KieSun/learn-react-essence/blob/master/render%20%E6%B5%81%E7%A8%8B%EF%BC%88%E4%BA%8C%EF%BC%89)
+- [调度原理](https://github.com/KieSun/learn-react-essence/blob/master/%E8%B0%83%E5%BA%A6%E5%8E%9F%E7%90%86.md)
+- [组件更新流程（一）](https://github.com/KieSun/learn-react-essence/blob/master/%E7%BB%84%E4%BB%B6%E6%9B%B4%E6%96%B0%E6%B5%81%E7%A8%8B%EF%BC%88%E4%B8%80%EF%BC%89.md)
 
-觉得内容有帮助可以关注下我的公众号 「前端真好玩」咯，会有很多好东西等着你。
+## 线上阅读地址
 
-![](https://user-gold-cdn.xitu.io/2018/12/7/1678800c654a7f34?w=258&h=258&f=jpeg&s=26756)
+Github 的阅读体验稍显逊色，你可以选择在[我的网站](https://yuchengkai.cn/react/)上阅读。
+
+
+## 一起学习
+
+觉得内容有帮助可以关注下我的公众号 「前端真好玩」或者加入 React 源码交流群。
+
+![](https://yck-1254263422.cos.ap-shanghai.myqcloud.com/blog/2019-06-01-034138.jpg)
+![](https://yck-1254263422.cos.ap-shanghai.myqcloud.com/blog/2019-06-01-034140.png)

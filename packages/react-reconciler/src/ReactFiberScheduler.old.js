@@ -1172,11 +1172,14 @@ function completeUnitOfWork(workInProgress: Fiber): Fiber | null {
   return null;
 }
 
+// 开始组件更新
 function performUnitOfWork(workInProgress: Fiber): Fiber | null {
   // The current, flushed, state of this fiber is the alternate.
   // Ideally nothing should rely on this, but relying on it here
   // means that we don't need an additional field on the work in
   // progress.
+  // 获得 fiber 的替身，调和这一阶段都是在替身上完成的
+  // 然后直接看 beginWork
   const current = workInProgress.alternate;
 
   // See if beginning this work spawns more work.
@@ -1197,7 +1200,6 @@ function performUnitOfWork(workInProgress: Fiber): Fiber | null {
     if (workInProgress.mode & ProfileMode) {
       startProfilerTimer(workInProgress);
     }
-
     next = beginWork(current, workInProgress, nextRenderExpirationTime);
     workInProgress.memoizedProps = workInProgress.pendingProps;
 
@@ -1206,6 +1208,7 @@ function performUnitOfWork(workInProgress: Fiber): Fiber | null {
       stopProfilerTimerIfRunningAndRecordDelta(workInProgress, true);
     }
   } else {
+    // 开始工作
     next = beginWork(current, workInProgress, nextRenderExpirationTime);
     workInProgress.memoizedProps = workInProgress.pendingProps;
   }
@@ -1235,8 +1238,11 @@ function performUnitOfWork(workInProgress: Fiber): Fiber | null {
 }
 
 function workLoop(isYieldy) {
+  // 对 nextUnitOfWork 循环进行判断，直到没有 nextUnitOfWork
   if (!isYieldy) {
     // Flush work without yielding
+    // 一开始进来 nextUnitOfWork 是 root，每次执行 performUnitOfWork 后
+    // 都会生成下一个工作单元
     while (nextUnitOfWork !== null) {
       nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
     }
@@ -1248,6 +1254,8 @@ function workLoop(isYieldy) {
   }
 }
 
+// 开始渲染整颗树，这个函数在异步模式下可能会被多次执行，因为在异步模式下
+// 可以打断任务。打断也就意味着每次都得回到 root 再开始从上往下循环
 function renderRoot(root: FiberRoot, isYieldy: boolean): void {
   invariant(
     !isWorking,
@@ -1274,6 +1282,7 @@ function renderRoot(root: FiberRoot, isYieldy: boolean): void {
     resetStack();
     nextRoot = root;
     nextRenderExpirationTime = expirationTime;
+    // 获取下一个需要工作的单元
     nextUnitOfWork = createWorkInProgress(
       nextRoot.current,
       null,
@@ -1339,6 +1348,7 @@ function renderRoot(root: FiberRoot, isYieldy: boolean): void {
 
   do {
     try {
+      // 循环更新节点
       workLoop(isYieldy);
     } catch (thrownValue) {
       resetContextDependences();
@@ -2345,6 +2355,7 @@ function findHighestPriorityRoot() {
 }
 
 function performAsyncWork(didTimeout) {
+  // 判断任务是否过期
   if (didTimeout) {
     // The callback timed out. That means at least one update has expired.
     // Iterate through the root schedule. If they contain expired work, set
@@ -2364,15 +2375,18 @@ function performAsyncWork(didTimeout) {
 
   // Keep working on roots until there's no more work, or until there's a higher
   // priority event.
+  // 找到优先级最高的节点
   findHighestPriorityRoot();
-
+  // 判断是否可以打断
   if (disableYielding) {
     // Just do it all
+    // 不可以打断，把任务执行到底
     while (nextFlushedRoot !== null && nextFlushedExpirationTime !== NoWork) {
       performWorkOnRoot(nextFlushedRoot, nextFlushedExpirationTime, false);
       findHighestPriorityRoot();
     }
   } else {
+    // 可以打断
     recomputeCurrentRendererTime();
     currentSchedulerTime = currentRendererTime;
 
@@ -2381,7 +2395,7 @@ function performAsyncWork(didTimeout) {
       const timeout = expirationTimeToMs(nextFlushedExpirationTime);
       stopRequestCallbackTimer(didExpire, timeout);
     }
-
+    // 判断当前不需要打断且当前帧还有时间
     while (
       nextFlushedRoot !== null &&
       nextFlushedExpirationTime !== NoWork &&
@@ -2424,6 +2438,8 @@ function performSyncWork() {
 function performWork(minExpirationTime: ExpirationTime) {
   // Keep working on roots until there's no more work, or until there's a higher
   // priority event.
+  // 这个函数内部逻辑和 performAsyncWork 差不多
+  // 反正最后都是调用 performWorkOnRoot 函数
   findHighestPriorityRoot();
 
   while (
@@ -2515,11 +2531,12 @@ function performWorkOnRoot(
 
   // Check if this is async work or sync/expired work.
   if (!isYieldy) {
+    // 不可打断任务
     // Flush work without yielding.
     // TODO: Non-yieldy work does not necessarily imply expired work. A renderer
     // may want to perform some work without yielding, but also without
     // requiring the root to complete (by triggering placeholders).
-
+    // 判断是否存在已完成的 finishedWork，存在话就完成它
     let finishedWork = root.finishedWork;
     if (finishedWork !== null) {
       // This root is already complete. We can commit it.
@@ -2534,6 +2551,7 @@ function performWorkOnRoot(
         // $FlowFixMe Complains noTimeout is not a TimeoutID, despite the check above
         cancelTimeout(timeoutHandle);
       }
+      // 否则就去渲染成 DOM
       renderRoot(root, isYieldy);
       finishedWork = root.finishedWork;
       if (finishedWork !== null) {
@@ -2542,6 +2560,7 @@ function performWorkOnRoot(
       }
     }
   } else {
+    // 可打断任务
     // Flush async work.
     let finishedWork = root.finishedWork;
     if (finishedWork !== null) {
